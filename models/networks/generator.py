@@ -74,7 +74,7 @@ class SPADEGenerator(BaseNetwork):
         return sw, sh
 
     def forward(self, input, z=None):
-        seg = input.to(torch.float32)
+        seg = input
 
         if self.opt.use_vae:
             # we sample z from unit normal and reshape the tensor
@@ -113,8 +113,7 @@ class SPADEGenerator(BaseNetwork):
             x = self.up_4(x, seg)
 
         x = self.conv_img(F.leaky_relu(x, 2e-1))
-        x = F.sigmoid(x)
-
+        x = torch.sigmoid(x)
         return x
 
 
