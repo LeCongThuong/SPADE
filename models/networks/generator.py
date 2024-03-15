@@ -113,7 +113,7 @@ class SPADEGenerator(BaseNetwork):
             x = self.up_4(x, seg)
 
         x = self.conv_img(F.leaky_relu(x, 2e-1))
-        x = F.tanh(x)
+        x = F.sigmoid(x)
 
         return x
 
@@ -174,7 +174,7 @@ class Pix2PixHDGenerator(BaseNetwork):
         # final output conv
         model += [nn.ReflectionPad2d(3),
                   nn.Conv2d(nc_out, opt.output_nc, kernel_size=7, padding=0),
-                  nn.Tanh()]
+                  nn.Sigmoid()]
 
         self.model = nn.Sequential(*model)
 
