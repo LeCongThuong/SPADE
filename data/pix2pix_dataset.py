@@ -7,7 +7,9 @@ from data.base_dataset import BaseDataset, get_params, get_transform
 from PIL import Image
 import util.util as util
 import os
-
+import torch
+from torchvision import transforms
+import numpy as np
 
 class Pix2pixDataset(BaseDataset):
     @staticmethod
@@ -41,6 +43,9 @@ class Pix2pixDataset(BaseDataset):
 
         size = len(self.label_paths)
         self.dataset_size = size
+        self.transforms = transforms.Compose([
+                transforms.ToTensor()
+        ])
 
     def get_paths(self, opt):
         label_paths = []
@@ -53,38 +58,40 @@ class Pix2pixDataset(BaseDataset):
         filename1_without_ext = os.path.splitext(os.path.basename(path1))[0]
         filename2_without_ext = os.path.splitext(os.path.basename(path2))[0]
         return filename1_without_ext == filename2_without_ext
+    
+    def preprocess_image(self, image_path):
+        """Utility function that load an image an convert to torch."""
+        # open image using OpenCV (HxWxC)
+        img = Image.open(image_path).convert('L')
+        # convert image to torch tensor (CxHxW)
+        img_t: torch.Tensor = self.transform(img)
+        return img_t
+
+    def preprocess_depth(self, depth_path):
+        """Utility function that load an image an convert to torch."""
+        # open image using OpenCV (HxWxC)
+        img: np.ndarray = np.load(depth_path)
+        # unsqueeze to make it 1xHxW
+        img = np.expand_dims(img, axis=0)
+        # cast type as np.float32
+        img = img.astype(np.float32)
+        # convert image to torch tensor (CxHxW)
+        img_t: torch.Tensor = torch.from_numpy(img)
+        return img_t
 
     def __getitem__(self, index):
         # Label Image
         label_path = self.label_paths[index]
-        label = Image.open(label_path)
-        params = get_params(self.opt, label.size)
-        transform_label = get_transform(self.opt, params, method=Image.NEAREST, normalize=False)
-        label_tensor = transform_label(label) * 255.0
-        label_tensor[label_tensor == 255] = self.opt.label_nc  # 'unknown' is opt.label_nc
+        label_tensor = self.preprocess_image(label_path)
 
         # input image (real images)
         image_path = self.image_paths[index]
         assert self.paths_match(label_path, image_path), \
             "The label_path %s and image_path %s don't match." % \
             (label_path, image_path)
-        image = Image.open(image_path)
-        image = image.convert('RGB')
-
-        transform_image = get_transform(self.opt, params)
-        image_tensor = transform_image(image)
-
-        # if using instance maps
-        if self.opt.no_instance:
-            instance_tensor = 0
-        else:
-            instance_path = self.instance_paths[index]
-            instance = Image.open(instance_path)
-            if instance.mode == 'L':
-                instance_tensor = transform_label(instance) * 255
-                instance_tensor = instance_tensor.long()
-            else:
-                instance_tensor = transform_label(instance)
+        image_tensor = self.preprocess_depth(image_path)
+        
+        instance_tensor = 0
 
         input_dict = {'label': label_tensor,
                       'instance': instance_tensor,
