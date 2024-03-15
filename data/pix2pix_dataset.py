@@ -12,6 +12,7 @@ from torchvision import transforms
 import numpy as np
 
 class Pix2pixDataset(BaseDataset):
+
     @staticmethod
     def modify_commandline_options(parser, is_train):
         parser.add_argument('--no_pairing_check', action='store_true',
@@ -43,9 +44,7 @@ class Pix2pixDataset(BaseDataset):
 
         size = len(self.label_paths)
         self.dataset_size = size
-        self.transforms = transforms.Compose([
-                transforms.ToTensor()
-        ])
+     
 
     def get_paths(self, opt):
         label_paths = []
@@ -64,7 +63,7 @@ class Pix2pixDataset(BaseDataset):
         # open image using OpenCV (HxWxC)
         img = Image.open(image_path).convert('L')
         # convert image to torch tensor (CxHxW)
-        img_t: torch.Tensor = self.transform(img)
+        img_t: torch.Tensor = transforms.ToTensor()(img)
         return img_t
 
     def preprocess_depth(self, depth_path):

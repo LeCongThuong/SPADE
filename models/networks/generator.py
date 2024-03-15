@@ -53,7 +53,7 @@ class SPADEGenerator(BaseNetwork):
             self.up_4 = SPADEResnetBlock(1 * nf, nf // 2, opt)
             final_nc = nf // 2
 
-        self.conv_img = nn.Conv2d(final_nc, 3, 3, padding=1)
+        self.conv_img = nn.Conv2d(final_nc, 1, 3, padding=1)
 
         self.up = nn.Upsample(scale_factor=2)
 
@@ -74,7 +74,7 @@ class SPADEGenerator(BaseNetwork):
         return sw, sh
 
     def forward(self, input, z=None):
-        seg = input
+        seg = input.to(torch.float32)
 
         if self.opt.use_vae:
             # we sample z from unit normal and reshape the tensor
@@ -85,7 +85,7 @@ class SPADEGenerator(BaseNetwork):
             x = x.view(-1, 16 * self.opt.ngf, self.sh, self.sw)
         else:
             # we downsample segmap and run convolution
-            x = F.interpolate(seg, size=(self.sh, self.sw))
+            x = F.interpolate(seg, [self.sh, self.sw])
             x = self.fc(x)
 
         x = self.head_0(x, seg)

@@ -114,6 +114,7 @@ class VGG19(torch.nn.Module):
                 param.requires_grad = False
 
     def forward(self, X):
+        X = X.repeat(1, 3, 1, 1)
         h_relu1 = self.slice1(X)
         h_relu2 = self.slice2(h_relu1)
         h_relu3 = self.slice3(h_relu2)
