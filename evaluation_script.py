@@ -3,6 +3,7 @@ import shutil
 import subprocess
 from pathlib import Path
 from tqdm import tqdm
+import argparse
 
 
 def inference_model(epoch, result_dir):
@@ -50,8 +51,8 @@ def run_evaluation(gt_dir, pred_dir, result_file):
     if result.returncode != 0:
         raise Exception(f"Error occurred: {result.stderr}")
 
-def main():
-    epochs = list(range(1, 11))
+def main(from_e, to_e):
+    epochs = list(range(from_e, to_e + 1))
 
     for epoch in tqdm(epochs):
         epoch = str(epoch)
@@ -75,5 +76,14 @@ def main():
             print(f"Error at {epoch}: {e}")
 
 
+def parse_aug():
+    parser = argparse.ArgumentParser(prog='Convert numpy depth to ply 3D object')
+    parser.add_argument('-from', '--from_e', type=int, help='start epoch')
+    parser.add_argument('-to', '--to_e', type=int, help='end epoch')
+    args = parser.parse_args()
+    return args
+
+
 if __name__ == "__main__":
-    main()
+    args = parse_aug()
+    main(args.from_e, args.to_e)
