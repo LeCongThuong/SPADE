@@ -33,7 +33,7 @@ class CustomDataset(Pix2pixDataset):
         label_paths = [str(label_path) for label_path in label_path_list] #make_dataset(label_dir, recursive=False, read_cache=True)
 
         image_dir = opt.image_dir
-        image_path_list = list(Path(image_dir).glob("*.npy"))
+        image_path_list = list(Path(image_dir).glob("*.npy") 
         image_paths = [str(image_path) for image_path in image_path_list] # make_dataset(image_dir, recursive=False, read_cache=True)
 
         instance_paths = []

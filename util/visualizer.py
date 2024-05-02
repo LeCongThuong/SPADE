@@ -15,7 +15,9 @@ except ImportError:
     from io import BytesIO         # Python 3.x
 from PIL import Image
 import numpy as np
-import tensorflow as tf
+# from torch.utils.tensorboard import SummaryWriter
+
+# import tensorflow as tf
 
 class Visualizer():
     def __init__(self, opt):

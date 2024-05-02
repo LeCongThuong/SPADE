@@ -6,6 +6,7 @@ import numpy as np
 from pathlib import Path
 import os
 from tqdm import tqdm
+import argparse
 
 
 def _convert_depth_to_pc(depth_img, inverted_matrix):
@@ -70,8 +71,8 @@ def convert_pred_depth_to_pc(depth_path, min_bound_z=-0.45, outlier_neighbors=50
 
 
 def gt_run():
-    np_gt_depth_dir = "/mnt/hmi/thuong/wb_train_val_test_dataset/valid/np_depth_512"
-    dest_gt_ply_dir = "/mnt/hmi/thuong/wb_train_val_test_dataset/valid/ply_512"
+    np_gt_depth_dir = "/mnt/hmi/thuong/wb_train_val_test_dataset/test/np_depth_512"
+    dest_gt_ply_dir = "/mnt/hmi/thuong/wb_train_val_test_dataset/test/ply_512"
     Path(dest_gt_ply_dir).mkdir(exist_ok=True, parents=True)
     np_gt_path_list = list(Path(np_gt_depth_dir).glob("*.npy"))
     for np_gt_path in tqdm(np_gt_path_list):
@@ -79,9 +80,9 @@ def gt_run():
         wb_pcd = convert_gt_depth_to_pc(str(np_gt_path))
         o3d.io.write_point_cloud(dest_ply_path, wb_pcd)
         
-def pred_run():
-    np_gt_depth_dir = "/mnt/hmi/thuong/SPADE/results/np"
-    dest_gt_ply_dir = "/mnt/hmi/thuong/SPADE/results/ply"
+def pred_run(np_gt_depth_dir, dest_gt_ply_dir):
+    # np_gt_depth_dir = "/mnt/hmi/thuong/SPADE/results/np"
+    # dest_gt_ply_dir = "/mnt/hmi/thuong/SPADE/results/ply"
     Path(dest_gt_ply_dir).mkdir(exist_ok=True, parents=True)
     np_gt_path_list = list(Path(np_gt_depth_dir).glob("*.npy"))
     for np_gt_path in tqdm(np_gt_path_list):
@@ -90,5 +91,14 @@ def pred_run():
         o3d.io.write_point_cloud(dest_ply_path, wb_pcd)      
 
 
+def parse_aug():
+    parser = argparse.ArgumentParser(prog='Convert numpy depth to ply 3D object')
+    parser.add_argument('-np', '--np_dir', help='path to numpy file')
+    parser.add_argument('-ply', '--ply_dir', help='path to ply file')
+    args = parser.parse_args()
+    return args
+
+
 if __name__ == "__main__":
-    pred_run()
+    args = parse_aug()
+    pred_run(args.np_dir, args.ply_dir)

@@ -25,7 +25,8 @@ def run(np_dir, dest_dir):
         convert_np_to_depth(str(np_path), dest_path)
         
         
-np_dir = "/mnt/hmi/thuong/wb_train_val_test_dataset/valid/np_depth_512"
-dest_dir = "/mnt/hmi/thuong/wb_train_val_test_dataset/valid/depth_512"
+np_dir = "/mnt/hmi/thuong/wb_train_val_test_dataset/test/np_depth_512"
+dest_dir = "/mnt/hmi/thuong/wb_train_val_test_dataset/test/depth_512"
+Path(dest_dir).mkdir(exist_ok=True, parents=True)
 # convert_np_to_depth(np_dir, dest_path="./snv.png")
 run(np_dir, dest_dir)
