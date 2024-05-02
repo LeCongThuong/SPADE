@@ -17,7 +17,7 @@ from PIL import Image
 import numpy as np
 # from torch.utils.tensorboard import SummaryWriter
 
-# import tensorflow as tf
+import tensorflow as tf
 
 class Visualizer():
     def __init__(self, opt):
