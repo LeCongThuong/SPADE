@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 import torch
 from tqdm import tqdm
 import point_cloud_utils as pcu
+import argparse
+import json
 
 
 def show_img(img):
@@ -100,23 +102,52 @@ def chamfer_score(gt_dir, pred_dir):
     return chamfer_mean_score
 
 
-def run():
-    gt_dir = "/mnt/hmi/thuong/wb_train_val_test_dataset/valid/depth_512"
-    pred_dir = "results/depth_512"
-    ply_gt_dir  = "/mnt/hmi/thuong/wb_train_val_test_dataset/valid/ply_512"
-    ply_pred_dir = "results/ply"
-    chamfer_score_result = chamfer_score(ply_gt_dir, ply_pred_dir)
+def run(gt_depth_dir, gt_ply_dir, pred_depth_dir, pred_ply_dir):
+    # gt_dir = "/mnt/hmi/thuong/wb_train_val_test_dataset/valid/depth_512"
+    # pred_dir = "results/depth_512"
+    # ply_gt_dir  = "/mnt/hmi/thuong/wb_train_val_test_dataset/valid/ply_512"
+    # ply_pred_dir = "results/ply"
+    chamfer_score_result = chamfer_score(gt_ply_dir, pred_ply_dir)
     print("Chamfer result: ", chamfer_score_result)
-    l1_sore, l2_score = l1_l2_metric_score(gt_dir, pred_dir)
-    print("L1, L2 score: ", l1_sore, l2_score)
+    l1_score, l2_score = l1_l2_metric_score(gt_depth_dir, pred_depth_dir)
+    print("L1, L2 score: ", l1_score, l2_score)
     D = SSIM(channels=1).cuda()
-    print("SSIM score: ", get_metric_score(gt_dir, pred_dir, D))
+    ssim_score = get_metric_score(gt_depth_dir, pred_depth_dir, D)
+    print("SSIM score: ", ssim_score)
     D = DISTS().cuda()
-    print("DISTS score: ", get_metric_score(gt_dir, pred_dir, D))
+    dists_score = get_metric_score(gt_depth_dir, pred_depth_dir, D)
+    print("DISTS score: ", dists_score)
     D = LPIPSvgg().cuda()
-    print("LPIPS score: ", get_metric_score(gt_dir, pred_dir, D))
+    lpips_score = get_metric_score(gt_depth_dir, pred_depth_dir, D)
+    print("LPIPS score: ", lpips_score)
+    return {
+        "chamfer_distance": float(chamfer_score_result),
+        "l1_score": float(l1_score),
+        "l2_score": float(l2_score),
+        "ssim_score": float(ssim_score), 
+        "dists_score": float(dists_score),
+        "lpips_score": float(lpips_score)
+    }
+
+def parse_aug():
+    parser = argparse.ArgumentParser(prog='Evaluation score')
+    parser.add_argument('-gt', '--gt_dir', help='path to gt directory')
+    parser.add_argument('-pred', '--pred_dir', help='path to pred directory')
+    parser.add_argument('-res', '--res_path', help='save result path')
+    args = parser.parse_args()
+    return args
     
 if __name__ == "__main__":
-    run()
+    args = parse_aug()
+    gt_depth_dir = str(os.path.join(args.gt_dir, "depth_512"))
+    gt_ply_dir = str(os.path.join(args.gt_dir, "ply_512"))
+    pred_depth_dir = str(os.path.join(args.pred_dir, "depth_512"))
+    pred_ply_dir = str(os.path.join(args.pred_dir, "ply_512"))
+
+    res_dict = run(gt_depth_dir, gt_ply_dir, pred_depth_dir, pred_ply_dir)
+
+    with open(args.res_path, "w") as f:
+        json.dump(res_dict, f, indent=4)
+
     
 # how to calculate FID score: python -m pytorch_fid "/mnt/hmi/thuong/SPADE/results/depth" "/mnt/hmi/thuong/wb_train_val_test_dataset/valid/depth_512"

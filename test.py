@@ -34,7 +34,7 @@ def create_mask(image):
 
 def save_imgs(img_batch, print_img_batch, file_name_path_list, dest_img_dir):
     
-    depth_img_dir = os.path.join(dest_img_dir, "depth")
+    depth_img_dir = os.path.join(dest_img_dir, "depth_512")
     depth_map_dir = os.path.join(dest_img_dir, "np")
     Path(depth_img_dir).mkdir(exist_ok=True, parents=True)
     Path(depth_map_dir).mkdir(exist_ok=True, parents=True)
