@@ -113,7 +113,7 @@ class SPADEGenerator(BaseNetwork):
             x = self.up_4(x, seg)
 
         x = self.conv_img(F.leaky_relu(x, 2e-1))
-        x = torch.sigmoid(x)
+        x = torch.tanh(x)
         return x
 
 
@@ -126,7 +126,7 @@ class Pix2PixHDGenerator(BaseNetwork):
                             help='kernel size of the resnet block')
         parser.add_argument('--resnet_initial_kernel_size', type=int, default=7,
                             help='kernel size of the first convolution')
-        parser.set_defaults(norm_G='instance')
+        parser.set_defaults(norm_G='spectral')
         return parser
 
     def __init__(self, opt):
@@ -173,7 +173,7 @@ class Pix2PixHDGenerator(BaseNetwork):
         # final output conv
         model += [nn.ReflectionPad2d(3),
                   nn.Conv2d(nc_out, opt.output_nc, kernel_size=7, padding=0),
-                  nn.Sigmoid()]
+                  nn.Tanh()]
 
         self.model = nn.Sequential(*model)
 
