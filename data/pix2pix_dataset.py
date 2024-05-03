@@ -63,7 +63,10 @@ class Pix2pixDataset(BaseDataset):
         # open image using OpenCV (HxWxC)
         img = Image.open(image_path).convert('L')
         # convert image to torch tensor (CxHxW)
-        img_t: torch.Tensor = transforms.ToTensor()(img)
+        img_t: torch.Tensor = transforms.Compose([
+                                transforms.ToTensor(),
+                                transforms.Normalize((0.5, ), (0.5, ))])(img)
+        
         return img_t
 
     def preprocess_depth(self, depth_path):
@@ -72,11 +75,13 @@ class Pix2pixDataset(BaseDataset):
         img: np.ndarray = np.load(depth_path)
         # unsqueeze to make it 1xHxW
         img = np.expand_dims(img, axis=0)
+        mask = img == img.max()
         # cast type as np.float32
         img = img.astype(np.float32)
         # convert image to torch tensor (CxHxW)
         img_t: torch.Tensor = torch.from_numpy(img)
-        return img_t
+        mask_t = torch.from_numpy(mask)
+        return img_t, mask_t
 
     def __getitem__(self, index):
         # Label Image
@@ -88,7 +93,7 @@ class Pix2pixDataset(BaseDataset):
         assert self.paths_match(label_path, image_path), \
             "The label_path %s and image_path %s don't match." % \
             (label_path, image_path)
-        image_tensor = self.preprocess_depth(image_path)
+        image_tensor, mask_tensor = self.preprocess_depth(image_path)
         
         instance_tensor = 0
 
@@ -96,6 +101,7 @@ class Pix2pixDataset(BaseDataset):
                       'instance': instance_tensor,
                       'image': image_tensor,
                       'path': image_path,
+                      'mask': mask_tensor
                       }
 
         # Give subclasses a chance to modify the final output
