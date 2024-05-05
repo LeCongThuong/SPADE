@@ -38,8 +38,8 @@ def get_metric_score(gt_dir, pred_dir, model):
     gt_path_list = list(Path(gt_dir).glob("*.png"))
     pred_path_list = [os.path.join(pred_dir, gt_path.name) for gt_path in gt_path_list]
     score_list = []
-    for index, gt_path in tqdm(enumerate(gt_path_list)):
-        pred_path = pred_path_list[index] 
+    for index, pred_path in tqdm(enumerate(pred_path_list)):
+        gt_path = gt_path_list[index] 
         score = get_score(gt_path, pred_path, model)
         score_list.append(score)
     mean_score = np.mean(score_list)
@@ -73,8 +73,8 @@ def l1_l2_metric_score(gt_dir, pred_dir):
     gt_path_list = list(Path(gt_dir).glob("*.png"))
     pred_path_list = [os.path.join(pred_dir, gt_path.name) for gt_path in gt_path_list]
     l1_score_list, l2_score_list = [], []
-    for index, gt_path in tqdm(enumerate(gt_path_list)):
-        pred_path = pred_path_list[index] 
+    for index, pred_path in tqdm(enumerate(pred_path_list)):
+        gt_path = gt_path_list[index] 
         l1_score, l2_score = get_l1_l2_mean_score(gt_path, pred_path)
         l1_score_list.append(l1_score)
         l2_score_list.append(l2_score)
@@ -94,10 +94,14 @@ def chamfer_score(gt_dir, pred_dir):
     gt_path_list = list(Path(gt_dir).glob("*.ply"))
     pred_path_list = [os.path.join(pred_dir, gt_path.name) for gt_path in gt_path_list]
     chamfer_score_list = []
-    for index, gt_path in tqdm(enumerate(gt_path_list)):
-        pred_path = pred_path_list[index] 
-        chamfer_score = get_chamfer_score(gt_path, pred_path)
-        chamfer_score_list.append(chamfer_score)
+    for index, pred_path in tqdm(enumerate(pred_path_list)):
+        try:
+            gt_path = gt_path_list[index] 
+            chamfer_score = get_chamfer_score(gt_path, pred_path)
+            chamfer_score_list.append(chamfer_score)
+        except Exception as e:
+            print("Error at {pred_path}", e)
+            continue
     chamfer_mean_score = np.mean(chamfer_score_list)
     return chamfer_mean_score
 
