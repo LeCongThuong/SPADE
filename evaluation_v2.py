@@ -89,8 +89,8 @@ def np_l1_l2_metric_score(np_gt_dir, np_pred_dir):
 
     for index, pred_path in tqdm(enumerate(pred_path_list)):
         gt_path = gt_path_list[index] 
-        gt_image = np.load(gt_path)
-        pred_image = np.load(pred_path)
+        gt_image = np.load(gt_path).squeeze()
+        pred_image = np.load(pred_path).squeeze()
 
         mask = gt_image != np.max(gt_image)
     
@@ -131,7 +131,7 @@ def chamfer_score(gt_dir, pred_dir):
     return chamfer_mean_score
 
 
-def run(gt_depth_dir, gt_ply_dir, pred_depth_dir, pred_ply_dir, np_eval=False):
+def run(gt_depth_dir, gt_ply_dir, gt_img_dir, pred_depth_dir, pred_ply_dir, pred_img_dir,  np_eval=False):
     # gt_dir = "/mnt/hmi/thuong/wb_train_val_test_dataset/valid/depth_512"
     # pred_dir = "results/depth_512"
     # ply_gt_dir  = "/mnt/hmi/thuong/wb_train_val_test_dataset/valid/ply_512"
@@ -144,16 +144,16 @@ def run(gt_depth_dir, gt_ply_dir, pred_depth_dir, pred_ply_dir, np_eval=False):
         l1_score, l2_score = l1_l2_metric_score(gt_depth_dir, pred_depth_dir)
     print("L1, L2 score: ", l1_score, l2_score)
     D = SSIM(channels=1).cuda()
-    ssim_score = get_metric_score(gt_depth_dir, pred_depth_dir, D)
+    ssim_score = get_metric_score(gt_img_dir, pred_img_dir, D)
     print("SSIM score: ", ssim_score)
     D = DISTS().cuda()
-    dists_score = get_metric_score(gt_depth_dir, pred_depth_dir, D)
+    dists_score = get_metric_score(gt_img_dir, pred_img_dir, D)
     print("DISTS score: ", dists_score)
     D = LPIPSvgg().cuda()
-    lpips_score = get_metric_score(gt_depth_dir, pred_depth_dir, D)
+    lpips_score = get_metric_score(gt_img_dir, pred_img_dir, D)
     print("LPIPS score: ", lpips_score)
     return {
-        # "chamfer_distance": float(chamfer_score_result),
+        "chamfer_distance": float(chamfer_score_result),
         "l1_score": float(l1_score),
         "l2_score": float(l2_score),
         "ssim_score": float(ssim_score), 
@@ -171,12 +171,15 @@ def parse_aug():
     
 if __name__ == "__main__":
     args = parse_aug()
-    gt_depth_dir = str(os.path.join(args.gt_dir, "depth_512"))
+    gt_depth_dir = str(os.path.join(args.gt_dir, "np_depth_512"))
     gt_ply_dir = str(os.path.join(args.gt_dir, "ply_512"))
-    pred_depth_dir = str(os.path.join(args.pred_dir, "depth_512"))
+    gt_img_dir = str(os.path.join(args.gt_dir, "depth_512"))
+    pred_depth_dir = str(os.path.join(args.pred_dir, "post_np"))
     pred_ply_dir = str(os.path.join(args.pred_dir, "ply_512"))
+    pred_img_dir = str(os.path.join(args.pred_dir, "depth_512"))
 
-    res_dict = run(gt_depth_dir, gt_ply_dir, pred_depth_dir, pred_ply_dir)
+
+    res_dict = run(gt_depth_dir, gt_ply_dir, gt_img_dir, pred_depth_dir, pred_ply_dir, pred_img_dir, np_eval=True)
 
     with open(args.res_path, "w") as f:
         json.dump(res_dict, f, indent=4)

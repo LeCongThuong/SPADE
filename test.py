@@ -34,29 +34,29 @@ def create_mask(image):
 
 def save_imgs(img_batch, print_img_batch, file_name_path_list, dest_img_dir):
     
-    depth_img_dir = os.path.join(dest_img_dir, "depth_512")
+    # depth_img_dir = os.path.join(dest_img_dir, "depth_512")
     depth_map_dir = os.path.join(dest_img_dir, "np")
-    Path(depth_img_dir).mkdir(exist_ok=True, parents=True)
+    # Path(depth_img_dir).mkdir(exist_ok=True, parents=True)
     Path(depth_map_dir).mkdir(exist_ok=True, parents=True)
 
     dest_depth_map_path_list = [Path(depth_map_dir) / Path(file_name_path).name for file_name_path in file_name_path_list]
-    dest_depth_img_path_list = [Path(depth_img_dir) / Path(file_name_path).name for file_name_path in file_name_path_list]
+    # dest_depth_img_path_list = [Path(depth_img_dir) / Path(file_name_path).name for file_name_path in file_name_path_list]
 
     num_imgs = img_batch.shape[0]
     for index in range(num_imgs):
         img = img_batch[index, :, :, :]
         print_img = np.transpose(print_img_batch[index, :, :, :], (1, 2, 0))
-        mask = create_mask(print_img)
+        # mask = create_mask(print_img)
         depth_map_file_path = dest_depth_map_path_list[index]
-        depth_img_file_path = dest_depth_img_path_list[index]
+        # depth_img_file_path = dest_depth_img_path_list[index]
         np_file_path = os.path.join(depth_map_dir, Path(depth_map_file_path).stem + ".npy")
-        depth_file_path = os.path.join(depth_img_dir, Path(depth_img_file_path).stem + ".png")
+        # depth_file_path = os.path.join(depth_img_dir, Path(depth_img_file_path).stem + ".png")
         img = np.transpose(img, (1, 2, 0))
         with open(np_file_path, "wb") as f:
             np.save(f, img)
-        img = np.where(mask, img, 1)
-        img = np.uint8(255*img).reshape(img.shape[0], img.shape[1])
-        Image.fromarray(img).save(depth_file_path)
+        # img = np.where(mask, img, 1)
+        # img = np.uint8(255*img).reshape(img.shape[0], img.shape[1])
+        # Image.fromarray(img).save(depth_file_path)
 
 opt = TestOptions().parse()
 

@@ -40,21 +40,19 @@ def convert_gt_depth_to_pc(depth_path, min_bound_z=-0.45, outlier_neighbors=50, 
         np_depth_map = np.load(str(depth_path))
     else:
         np_depth_map = depth_path
-    print(len(np_depth_map.shape))
     wb_pcd = _convert_depth_to_pc(np_depth_map, matrix_2dto3d)
     np_vertices = np.asarray(wb_pcd.points)
 
     filtered_np_vertices = np_vertices[np_vertices[:, 2] > min_bound_z]
     wb_pcd.points = o3d.utility.Vector3dVector(filtered_np_vertices)
     return wb_pcd
-
-def convert_pred_depth_to_pc(depth_path, min_bound_z=-0.45, outlier_neighbors=50, outlier_std_ratio=0.6, depth_res=512):
+# outlier_std_ratio: 
+def convert_pred_depth_to_pc(depth_path, min_bound_z=-0.45, outlier_neighbors=150, outlier_std_ratio=8.0, depth_res=512):
     matrix_2dto3d = np.asarray([[1 / depth_res, 0, 0, -0.5], [0, -1 / depth_res, 0, 0.5], [0, 0, -1, 0.5], [0, 0, 0, 1]])
     if isinstance(depth_path, str) or isinstance(depth_path, PosixPath):
         np_depth_map = np.load(str(depth_path))
     else:
         np_depth_map = depth_path
-    print(len(np_depth_map.shape))
     wb_pcd = _convert_depth_to_pc(np_depth_map, matrix_2dto3d)
     np_vertices = np.asarray(wb_pcd.points)
 
@@ -80,14 +78,14 @@ def gt_run():
         wb_pcd = convert_gt_depth_to_pc(str(np_gt_path))
         o3d.io.write_point_cloud(dest_ply_path, wb_pcd)
         
-def pred_run(np_gt_depth_dir, dest_gt_ply_dir):
+def pred_run(np_depth_dir, dest_gt_ply_dir):
     # np_gt_depth_dir = "/mnt/hmi/thuong/SPADE/results/np"
     # dest_gt_ply_dir = "/mnt/hmi/thuong/SPADE/results/ply"
     Path(dest_gt_ply_dir).mkdir(exist_ok=True, parents=True)
-    np_gt_path_list = list(Path(np_gt_depth_dir).glob("*.npy"))
-    for np_gt_path in tqdm(np_gt_path_list):
-        dest_ply_path = os.path.join(dest_gt_ply_dir, f"{np_gt_path.stem}.ply")
-        wb_pcd = convert_pred_depth_to_pc(str(np_gt_path))
+    np_depth_path_list = list(Path(np_depth_dir).glob("*.npy"))
+    for np_depth_path in tqdm(np_depth_path_list):
+        dest_ply_path = os.path.join(dest_gt_ply_dir, f"{np_depth_path.stem}.ply")
+        wb_pcd = convert_pred_depth_to_pc(str(np_depth_path))
         o3d.io.write_point_cloud(dest_ply_path, wb_pcd)      
 
 
@@ -102,3 +100,4 @@ def parse_aug():
 if __name__ == "__main__":
     args = parse_aug()
     pred_run(args.np_dir, args.ply_dir)
+    # gt_run()
