@@ -11,6 +11,7 @@ class TrainOptions(BaseOptions):
         BaseOptions.initialize(self, parser)
         # for displays
         parser.add_argument('--display_freq', type=int, default=100, help='frequency of showing training results on screen')
+        parser.add_argument('--seed', type=int, default=1, help='seed for training')
         parser.add_argument('--print_freq', type=int, default=50, help='frequency of showing training results on console')
         parser.add_argument('--save_latest_freq', type=int, default=65000, help='frequency of saving the latest results')
         parser.add_argument('--save_epoch_freq', type=int, default=1, help='frequency of saving checkpoints at the end of epochs')

@@ -153,7 +153,7 @@ def run(gt_depth_dir, gt_ply_dir, pred_depth_dir, pred_ply_dir, np_eval=False):
     lpips_score = get_metric_score(gt_depth_dir, pred_depth_dir, D)
     print("LPIPS score: ", lpips_score)
     return {
-        # "chamfer_distance": float(chamfer_score_result),
+        "chamfer_distance": float(chamfer_score_result),
         "l1_score": float(l1_score),
         "l2_score": float(l2_score),
         "ssim_score": float(ssim_score), 

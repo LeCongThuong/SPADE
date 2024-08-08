@@ -86,7 +86,7 @@ def pred_run(np_depth_dir, dest_gt_ply_dir):
     for np_depth_path in tqdm(np_depth_path_list):
         dest_ply_path = os.path.join(dest_gt_ply_dir, f"{np_depth_path.stem}.ply")
         wb_pcd = convert_pred_depth_to_pc(str(np_depth_path))
-        o3d.io.write_point_cloud(dest_ply_path, wb_pcd)      
+        o3d.io.write_point_cloud(dest_ply_path, wb_pcd)
 
 
 def parse_aug():
