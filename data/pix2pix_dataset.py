@@ -10,6 +10,7 @@ import os
 import torch
 from torchvision import transforms
 import numpy as np
+import random
 
 class Pix2pixDataset(BaseDataset):
 
@@ -84,16 +85,17 @@ class Pix2pixDataset(BaseDataset):
         return img_t, mask_t
 
     def __getitem__(self, index):
-        # Label Image
-        label_path = self.label_paths[index]
-        label_tensor = self.preprocess_image(label_path)
+        while True:
+            try:
+                label_path = self.label_paths[index]
+                label_tensor = self.preprocess_image(label_path)
 
-        # input image (real images)
-        image_path = self.image_paths[index]
-        assert self.paths_match(label_path, image_path), \
-            "The label_path %s and image_path %s don't match." % \
-            (label_path, image_path)
-        image_tensor, mask_tensor = self.preprocess_depth(image_path)
+                image_path = self.image_paths[index]
+                image_tensor, mask_tensor = self.preprocess_depth(image_path)
+                break  # Exit the loop if processing is successful
+            except Exception as e:
+                print(self.image_paths[index])
+                index = random.randrange(len(self.image_paths))
         
         instance_tensor = 0
 
